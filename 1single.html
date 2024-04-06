@@ -3,12 +3,6 @@ title: 1. Single file
 layout: page
 ---
 
-<script type="module">
-  import { client } from 'https://cdn.skypack.dev/@gradio/client';
-  
-  // Your script that uses `client` from `@gradio/client`
-</script>
-
 <input id="photo" type="file">
 <div id="results"></div>
 
@@ -16,12 +10,18 @@ layout: page
   import { client } from 'https://cdn.skypack.dev/@gradio/client';
 
   async function uploadAndPredict(file) {
-    const app = await client("RishRatnalingam/cxr_lungCancer_detector");
-    const prediction = await app.predict("/predict", [file]);
-    console.log(prediction.data); // You might need to adjust based on your API's actual response
+    try {
+      const app = await client("RishRatnalingam/cxr_lungCancer_detector");
+      const prediction = await app.predict("/predict", [file]);
+      console.log(prediction.data); // Adjust this to properly display based on your API response
 
-    // Example of displaying the prediction
-    document.getElementById('results').innerHTML = `<br/><img src="${URL.createObjectURL(file)}" width="300"><p>${prediction.data}</p>`;
+      // Assuming prediction.data is directly displayable
+      document.getElementById('results').innerHTML = `<br/><img src="${URL.createObjectURL(file)}" width="300"><p>${prediction.data}</p>`;
+    } catch (error) {
+      console.error("Error during prediction:", error);
+      // Display or log the error appropriately
+      document.getElementById('results').textContent = 'An error occurred: ' + error.message;
+    }
   }
 
   document.getElementById('photo').addEventListener('input', function() {
