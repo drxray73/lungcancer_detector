@@ -3,35 +3,34 @@ title: 1. Single file
 layout: page
 ---
 
-
-<script>
-  async function loaded(file) {
-    const formData = new FormData();
-    formData.append('img', file);
-
-    const response = await fetch('https://hf.space/embed/RishRatnalingam/cxr_lungCancer_detector/+/api/predict/', {
-      method: "POST",
-      body: formData,
-    });
-    const json = await response.json();
-    
-    // Assuming the API returns a structure like:
-    // {label: "SomeLabel", confidences: [{"label": "Label1", "confidence": 0.9}]}
-    // Adjust based on the actual response structure
-    const label = json.label; // or json['label'] if you prefer
-    let confidences = "";
-    if (json.confidences && json.confidences.length > 0) {
-      confidences = json.confidences.map(c => `${c.label}: ${c.confidence}`).join(", ");
-    }
-    results.innerHTML = `<br/><img src="${URL.createObjectURL(file)}" width="300"> <p>Label: ${label}, Confidence: ${confidences}</p>`;
-  }
-  function read() {
-    const file = photo.files[0];
-    if (file) {
-      loaded(file);
-    }
-  }
-  photo.addEventListener('input', read);
+<script type="module">
+  import { client } from 'https://cdn.skypack.dev/@gradio/client';
+  
+  // Your script that uses `client` from `@gradio/client`
 </script>
+
+<input id="photo" type="file">
+<div id="results"></div>
+
+<script type="module">
+  import { client } from 'https://cdn.skypack.dev/@gradio/client';
+
+  async function uploadAndPredict(file) {
+    const app = await client("RishRatnalingam/cxr_lungCancer_detector");
+    const prediction = await app.predict("/predict", [file]);
+    console.log(prediction.data); // You might need to adjust based on your API's actual response
+
+    // Example of displaying the prediction
+    document.getElementById('results').innerHTML = `<br/><img src="${URL.createObjectURL(file)}" width="300"><p>${prediction.data}</p>`;
+  }
+
+  document.getElementById('photo').addEventListener('input', function() {
+    const file = this.files[0];
+    if (file) {
+      uploadAndPredict(file);
+    }
+  });
+</script>
+
 
 
